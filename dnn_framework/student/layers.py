@@ -7,21 +7,43 @@ class FullyConnectedLayer(Layer):
     """
     This class implements a fully connected layer.
     """
+    # Layer.weights = None
+    # Layer.bias = None
+    # Layer.cache = None # cache[0]=0
 
     def __init__(self, input_count, output_count):
-        raise NotImplementedError()
+        self.weights = np.zeros((output_count, input_count)) # np.random.randn(output_count, input_count) * 0.01
+        self.bias = np.zeros(output_count)
 
     def get_parameters(self):
-        raise NotImplementedError()
+        # mutable (python shares references)
+        return {
+            'w': self.weights,
+            'b': self.bias
+        }
 
     def get_buffers(self):
-        raise NotImplementedError()
+        # new copy (will not change with training)
+        return {
+            'w': self.weights.copy(),
+            'b': self.bias.copy()
+        }
 
     def forward(self, x):
-        raise NotImplementedError()
+        y = x@self.weights.T + self.bias
+        cache = x
+        return y, cache
 
     def backward(self, output_grad, cache):
-        raise NotImplementedError()
+        x = cache
+        dl_dw = output_grad.T @ cache
+        dl_db = np.sum(output_grad, axis=0)
+        dl_dx = output_grad @ self.weights
+        parameters_grad = {
+            'w': dl_dw,
+            'b': dl_db
+        }
+        return dl_dx, parameters_grad
 
 
 class BatchNormalization(Layer):
@@ -57,16 +79,20 @@ class Sigmoid(Layer):
     """
 
     def get_parameters(self):
-        raise NotImplementedError()
+        return {}
 
     def get_buffers(self):
-        raise NotImplementedError()
+        return {}
 
     def forward(self, x):
-        raise NotImplementedError()
+        y = 1 / (1 + np.exp(-x))
+        cache = y
+        return y, cache
 
     def backward(self, output_grad, cache):
-        raise NotImplementedError()
+        y = cache
+        dl_dx = (1 - y) * y * output_grad
+        return dl_dx, {}
 
 
 class ReLU(Layer):
@@ -75,13 +101,19 @@ class ReLU(Layer):
     """
 
     def get_parameters(self):
-        raise NotImplementedError()
+        return {}
 
     def get_buffers(self):
-        raise NotImplementedError()
+        return {}
 
     def forward(self, x):
-        raise NotImplementedError()
+        y = np.copy(x)
+        y[x < 0] = 0
+        cache = x
+        return y, cache
 
     def backward(self, output_grad, cache):
-        raise NotImplementedError()
+        x = cache
+        dl_dx = np.copy(output_grad)
+        dl_dx[x < 0] = 0
+        return dl_dx, {}
