@@ -1,6 +1,6 @@
 import argparse
 
-from dnn_framework import Network, FullyConnectedLayer, BatchNormalization, ReLU
+from dnn_framework import Network, FullyConnectedLayer, BatchNormalization, ReLU, Sigmoid
 from mnist import MnistTrainer
 
 
@@ -22,6 +22,14 @@ def main():
 
 def create_network(checkpoint_path):
     layers = []
+    layers.append(FullyConnectedLayer(784, 128))
+    layers.append(BatchNormalization(128))
+    layers.append(ReLU())
+    layers.append(FullyConnectedLayer(128, 32))
+    layers.append(BatchNormalization(32))
+    layers.append(ReLU())
+    layers.append(FullyConnectedLayer(32, 10))
+    layers.append(Sigmoid())
     network = Network(layers)
     if checkpoint_path is not None:
         network.load(checkpoint_path)
